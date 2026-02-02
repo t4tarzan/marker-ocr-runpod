@@ -22,11 +22,13 @@ RUN pip3 install --no-cache-dir \
 # Copy handler
 COPY handler.py /app/handler.py
 
-# Pre-download Marker models to reduce cold start time
-RUN python3 -c "from marker.models import load_all_models; load_all_models()"
-
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
+ENV TORCH_HOME=/runpod-volume/.cache/torch
+ENV HF_HOME=/runpod-volume/.cache/huggingface
+
+# Models will be downloaded on first run and cached in /runpod-volume
+# This is faster than downloading during build
 
 # Run the handler
 CMD ["python3", "-u", "handler.py"]
