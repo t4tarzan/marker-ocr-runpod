@@ -8,13 +8,20 @@ import base64
 import json
 import tempfile
 import os
+import sys
 from pathlib import Path
+
+print("Handler starting...")
+print(f"Python version: {sys.version}")
 
 # Import marker after it's installed in the container
 try:
+    print("Importing marker modules...")
     from marker.convert import convert_single_pdf
     from marker.models import load_all_models
-except ImportError:
+    print("Marker modules imported successfully")
+except ImportError as e:
+    print(f"Marker import error: {e}")
     print("Marker not installed, will be installed in container")
 
 # Load models once at startup
@@ -25,8 +32,12 @@ def initialize_models():
     global model_lst
     if model_lst is None:
         print("Loading Marker models...")
-        model_lst = load_all_models()
-        print("Models loaded successfully")
+        try:
+            model_lst = load_all_models()
+            print("Models loaded successfully")
+        except Exception as e:
+            print(f"Error loading models: {e}")
+            raise
     return model_lst
 
 def process_pdf(job):
@@ -49,8 +60,10 @@ def process_pdf(job):
         "success": true
     }
     """
+    print(f"Received job: {job.get('id', 'unknown')}")
     try:
         job_input = job["input"]
+        print(f"Job input keys: {list(job_input.keys())}")
         
         # Get PDF data
         pdf_base64 = job_input.get("pdf_base64")
