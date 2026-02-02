@@ -1,0 +1,51 @@
+{
+  "title": "Marker OCR RunPod",
+  "description": "High-accuracy PDF to text extraction using Marker OCR on A100 GPU. Processes PDFs with 95-98% accuracy, handles tables, multi-column layouts, and forms.",
+  "type": "serverless",
+  "category": "image",
+  "iconUrl": "https://raw.githubusercontent.com/t4tarzan/marker-ocr-runpod/main/icon.png",
+  "config": {
+    "runsOn": "GPU",
+    "containerDiskInGb": 20,
+    "presets": [
+      {
+        "name": "A100 80GB (Recommended)",
+        "defaults": {
+          "GPU_TYPE": "A100_SXM_80GB",
+          "MAX_PAGES": "0"
+        }
+      },
+      {
+        "name": "A100 40GB",
+        "defaults": {
+          "GPU_TYPE": "A100_SXM_40GB",
+          "MAX_PAGES": "50"
+        }
+      }
+    ],
+    "env": [
+      {
+        "key": "MARKER_OUTPUT_FORMAT",
+        "value": "json"
+      },
+      {
+        "key": "MAX_PAGES",
+        "input": {
+          "name": "Max Pages",
+          "type": "string",
+          "description": "Maximum number of pages to process (0 = unlimited)",
+          "default": "0"
+        }
+      },
+      {
+        "key": "BATCH_MULTIPLIER",
+        "input": {
+          "name": "Batch Multiplier",
+          "type": "string",
+          "description": "Batch size multiplier for processing (1-4)",
+          "default": "1"
+        }
+      }
+    ]
+  }
+}
