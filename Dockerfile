@@ -21,9 +21,9 @@ RUN pip3 install --no-cache-dir \
     --index-url https://download.pytorch.org/whl/cu118
 
 # Install marker-pdf and dependencies
-RUN pip3 install --no-cache-dir \
-    marker-pdf \
-    runpod
+RUN pip3 install --no-cache-dir marker-pdf && \
+    pip3 install --no-cache-dir runpod && \
+    python3 -c "from marker.convert import convert_single_pdf; from marker.models import load_all_models; print('Marker installed successfully')"
 
 # Copy handler
 COPY handler.py /app/handler.py
