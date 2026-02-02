@@ -15,14 +15,19 @@ print("Handler starting...")
 print(f"Python version: {sys.version}")
 
 # Import marker after it's installed in the container
+convert_single_pdf = None
+load_all_models = None
+
 try:
     print("Importing marker modules...")
     from marker.convert import convert_single_pdf
     from marker.models import load_all_models
     print("Marker modules imported successfully")
 except ImportError as e:
-    print(f"Marker import error: {e}")
-    print("Marker not installed, will be installed in container")
+    print(f"CRITICAL: Marker import failed: {e}")
+    print("This container does not have marker-pdf installed correctly")
+    import sys
+    sys.exit(1)
 
 # Load models once at startup
 model_lst = None
