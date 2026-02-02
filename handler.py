@@ -120,9 +120,14 @@ def process_pdf(job):
             raise e
             
     except Exception as e:
-        print(f"Error processing PDF: {str(e)}")
+        import traceback
+        error_msg = str(e)
+        error_trace = traceback.format_exc()
+        print(f"Error processing PDF: {error_msg}")
+        print(f"Traceback: {error_trace}")
         return {
-            "error": str(e),
+            "error": error_msg,
+            "traceback": error_trace,
             "success": False
         }
 
