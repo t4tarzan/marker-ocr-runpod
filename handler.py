@@ -82,44 +82,37 @@ def process_pdf(job):
             return {"error": "No pdf_base64 provided", "success": False}
         
         # Decode PDF
-        pdf_bytes = base64.b64decode(pdf_base64)
+        pdf_data = base64.b64decode(pdf_base64)
         
-        # Save to temp file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
-            tmp_file.write(pdf_bytes)
+        # Save to temporary file
+        with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as tmp_file:
+            tmp_file.write(pdf_data)
             tmp_path = tmp_file.name
         
         try:
-            # Initialize models if not already loaded
-            models = initialize_models()
+            # Initialize converter if not already loaded
+            conv = initialize_converter()
             
-            # Process with Marker
-            print(f"Processing {filename}...")
-            full_text, images, metadata = convert_single_pdf(
-                tmp_path,
-                models,
-                max_pages=None,
-                langs=None,
-                batch_multiplier=1
-            )
+            # Process PDF with Marker
+            print(f"Processing PDF: {filename}")
+            rendered = conv(tmp_path)
+            
+            # Extract text from rendered output
+            full_text, _, images = text_from_rendered(rendered)
             
             # Clean up temp file
             os.unlink(tmp_path)
             
-            # Return results
-            result = {
-                "text": full_text,
-                "metadata": {
-                    "filename": filename,
-                    "pages": metadata.get("pages", 0),
-                    "language": metadata.get("language", "en"),
-                    "toc": metadata.get("toc", []),
-                },
-                "success": True
-            }
-            
             print(f"Successfully processed {filename}")
-            return result
+            print(f"Extracted {len(full_text)} characters")
+            
+            return {
+                "success": True,
+                "filename": filename,
+                "text": full_text,
+                "metadata": rendered.metadata if hasattr(rendered, 'metadata') else {},
+                "num_images": len(images) if images else 0
+            }
             
         except Exception as e:
             # Clean up temp file on error
