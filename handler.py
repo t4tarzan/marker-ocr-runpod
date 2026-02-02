@@ -15,13 +15,15 @@ print("Handler starting...")
 print(f"Python version: {sys.version}")
 
 # Import marker after it's installed in the container
-convert_single_pdf = None
-load_all_models = None
+PdfConverter = None
+create_model_dict = None
+text_from_rendered = None
 
 try:
     print("Importing marker modules...")
-    from marker.convert import convert_single_pdf
-    from marker.models import load_all_models
+    from marker.converters.pdf import PdfConverter
+    from marker.models import create_model_dict
+    from marker.output import text_from_rendered
     print("Marker modules imported successfully")
 except ImportError as e:
     print(f"CRITICAL: Marker import failed: {e}")
@@ -29,21 +31,22 @@ except ImportError as e:
     import sys
     sys.exit(1)
 
-# Load models once at startup
-model_lst = None
+# Initialize converter once at startup
+converter = None
 
-def initialize_models():
-    """Load Marker models once at container startup"""
-    global model_lst
-    if model_lst is None:
-        print("Loading Marker models...")
+def initialize_converter():
+    """Initialize Marker converter once at container startup"""
+    global converter
+    if converter is None:
+        print("Initializing Marker converter...")
         try:
-            model_lst = load_all_models()
-            print("Models loaded successfully")
+            artifact_dict = create_model_dict()
+            converter = PdfConverter(artifact_dict=artifact_dict)
+            print("Converter initialized successfully")
         except Exception as e:
-            print(f"Error loading models: {e}")
+            print(f"Error initializing converter: {e}")
             raise
-    return model_lst
+    return converter
 
 def process_pdf(job):
     """
